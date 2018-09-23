@@ -1,23 +1,30 @@
 var head;
-var nodes;
+var clickable;
+const N = 5;
 
 function setup() {
-    head = new Node(6, 5, 1000, 300);
-    nodes = [];
-    initialize(head);
-    // head.createChildren();
+    head = new Node(N, N, 500 + 100 * N, 300);
+    nodes = []
+    clickable = [];
+    current = [];
+    initialize(head, nodes);
+    initialize(head, clickable);
+    for (var i = nodes.length - 1; i >= 0; i--) {
+        if (nodes[i].n < 2) {
+            clickable.splice(i, 1);
+        }
+    }
     createCanvas(4000, 4000);
 
     stroke(240, 230, 140);
     showCode();
-
-    // background(200);
 }
 
 function draw() {
     strokeWeight(5);
 
     head.display();
+    // nodes[1].display();
     fill(240, 230, 140);
     if (head.hovered()) {
         fill(255);
@@ -26,21 +33,35 @@ function draw() {
     }
     stroke(240, 230, 140);
 
-    for (node of nodes) {
+    for (var i = 0; i < clickable.length; i++) {
+        node = clickable[i]
         if (node.clicked()) {
             if (node.left) {
                 node.leftArrow();
                 node.rightArrow();
                 node.display();
+                current.push(node, node.left, node.right);
                 node.left.display();
                 node.right.display();
-            } else {
-
+                clickable.splice(i, 1);
             }
         }
     }
-    // (new Node(4, 250, 300)).display();
-    // noStroke();
+
+    for (node of current) {
+        ready = !node.left || node.left.revealed & node.right.revealed;
+        if (node.clicked() && ready) {
+            node.revealed = true;
+        } else if (ready) {
+            node.ready = true;
+        }
+        node.display();
+    }
+
+    if (head.revealed) {
+        window.alert("Congratulations! You solved fibonacci through tree recursion.")
+        head.revealed = false;
+    }
 }
 
 
@@ -60,17 +81,26 @@ function Node(n, level, x, y) {
     this.fib = fib(n);
     this.level = level;
     this.revealed = false;
+    this.ready = false;
+
+    this.reveal = function() {
+        this.revealed = true;
+    }
 
     this.display = function() {
         rectMode(CENTER);
         noStroke();
-        fill(240, 230, 140);
+        if (this.ready) {
+            fill(50, 205, 50);
+        } else {
+            fill(240, 230, 140);
+        }
         rect(this.x, this.y, 10 + 40 * this.level, 50 + 10 * this.level);
         fill(105);
         textSize(10 + 4 * this.level);
         textAlign(CENTER, CENTER);
         if (this.revealed) {
-
+            text(this.fib, this.x, this.y);
         } else {
             text("fib(" + this.n + ")", this.x, this.y);
         }
@@ -87,17 +117,11 @@ function Node(n, level, x, y) {
 
     this.leftArrow = function() {
         stroke(105);
-        // line(x-25, y+50, x-25, y+100);
-        // line(x-25, y+100, x-150, y+100);
-        // line(x-150, y+100, x-150, y+200);
         line(this.x, this.y, this.left.x, this.right.y);
     }
 
     this.rightArrow = function() {
         stroke(105);
-        // line(x+25, y+50, x+25, y+100);
-        // line(x+25, y+100, x+150, y+100);
-        // line(x+150, y+100, x+150, y+200);
         line(this.x, this.y, this.right.x, this.right.y);
     }
 
@@ -119,12 +143,12 @@ function Node(n, level, x, y) {
 
 }
 
-function initialize(node) {
-    nodes.push(node);
+function initialize(node, arr) {
+    arr.push(node);
     if (node.n > 1) {
         node.createChildren();
-        initialize(node.left);
-        initialize(node.right);
+        initialize(node.left, arr);
+        initialize(node.right, arr);
     }
 }
 
@@ -143,7 +167,7 @@ function showCode() {
                "  if n < 2 {\n" +
                "    return n;\n" +
                "  }\n" +
-               "  return fib(n - 1) + fib (n - 2);\n" +
+               "  return fib(n - 1) + fib(n - 2);\n" +
                "}";
     text(code, 75, 100);
 }
