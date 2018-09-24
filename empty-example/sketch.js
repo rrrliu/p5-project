@@ -1,79 +1,76 @@
 var head;
 var clickable;
-const N = 5;
 var initialized = false;
 
 function setup() {
-    head = new Node(N, N, 500 + 100 * N, 400);
-    nodes = []
-    clickable = [];
-    current = [];
-    initialize(head, nodes);
-    initialize(head, clickable);
-    for (var i = nodes.length - 1; i >= 0; i--) {
-        if (nodes[i].n < 2) {
-            clickable.splice(i, 1);
-        }
-    }
+
     createCanvas(4000, 4000);
 
     stroke(240, 230, 140);
     showCode();
+    buttonX = 75;
+    buttonY = 275;
+    buttonW = 130;
+    buttonH = 50;
 }
 
 function draw() {
     rectMode(CORNER);
     fill(180);
     noStroke();
-    rect(75, 275, 130, 50);
+    rect(buttonX, buttonY, buttonW, buttonH);
     fill(255);
     textSize(16);
     textAlign(CENTER, CENTER);
     text('Generate', 140, 300);
     strokeWeight(5);
-    head.display();
-    // nodes[1].display();
-    fill(240, 230, 140);
-    if (head.hovered()) {
-        fill(255);
-    } else {
-        fill(240, 230, 140);
-    }
-    stroke(240, 230, 140);
 
-    for (var i = 0; i < clickable.length; i++) {
-        node = clickable[i];
-        if (node.clicked()) {
-            if (node.left) {
-                node.leftArrow();
-                node.rightArrow();
-                node.display();
-                current.push(node, node.left, node.right);
-                node.left.display();
-                node.right.display();
-                clickable.splice(i, 1);
+    if (initialized) {
+        head.display();
+
+        // nodes[1].display();
+        fill(240, 230, 140);
+        if (head.hovered()) {
+            fill(255);
+        } else {
+            fill(240, 230, 140);
+        }
+        stroke(240, 230, 140);
+
+        for (var i = 0; i < clickable.length; i++) {
+            node = clickable[i];
+            if (node.clicked()) {
+                if (node.left) {
+                    node.leftArrow();
+                    node.rightArrow();
+                    node.display();
+                    current.push(node, node.left, node.right);
+                    node.left.display();
+                    node.right.display();
+                    clickable.splice(i, 1);
+                }
             }
         }
-    }
 
-    for (node of current) {
-        ready = !node.left || node.left.revealed & node.right.revealed;
-        if (node.clicked() && ready) {
-            node.revealed = true;
-        } else if (ready) {
-            node.ready = true;
+        for (node of current) {
+            ready = !node.left || node.left.revealed & node.right.revealed;
+            if (node.clicked() && ready) {
+                node.revealed = true;
+            } else if (ready) {
+                node.ready = true;
+            }
+            node.display();
         }
-        node.display();
-    }
 
-    if (head.revealed) {
-        textAlign(CENTER);
-        textFont('Helvetica');
-        textSize(20);
-        noStroke();
-        fill(50, 205, 50);
-        text('Congratulations! You solved fibonacci through tree recursion.', 500 + 100 * N, 300);
-        // head.revealed = false;
+        if (head.revealed) {
+            textAlign(CENTER);
+            textFont('Helvetica');
+            textSize(20);
+            noStroke();
+            fill(50, 205, 50);
+            text('Congratulations! You solved fibonacci through tree recursion.', 500 + 100 * N, 300);
+            // head.revealed = false;
+        }
     }
 }
 
@@ -167,6 +164,32 @@ function initialize(node, arr) {
     }
 }
 
+function overButton(x, y, width, height) {
+    if (mouseX >= x && mouseX <= x + width &&
+        mouseY >= y && mouseY <= y + height) {
+            return true;
+        }
+    return false;
+}
+
+function mousePressed() {
+    if (overButton(buttonX, buttonY, buttonW, buttonH)) {
+        initialized = true;
+        N = Math.floor(Math.random() * 4) + 2;
+        head = new Node(N, N, 500 + 100 * N, 400);
+        nodes = []
+        clickable = [];
+        current = [];
+        initialize(head, nodes);
+        initialize(head, clickable);
+        for (var i = nodes.length - 1; i >= 0; i--) {
+            if (nodes[i].n < 2) {
+                clickable.splice(i, 1);
+            }
+        }
+    }
+}
+
 function showCode() {
     textSize(32);
     textFont('Helvetica');
@@ -188,7 +211,7 @@ function showCode() {
     fill(0);
     textFont('Helvetica');
     textSize(16)
-    var instructions = 'Instructions: Click on the yellow nodes to open up their recursive cases, then click on green nodes to solve for base cases.';
+    var instructions = 'Instructions: Click and hold on the yellow nodes to open up their recursive cases, then click and hold on the green nodes to solve for base cases.';
     text(instructions, 75, 250)
 
     var prompt = 'Choose a number N to solve for fib(N):';
