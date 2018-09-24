@@ -1,9 +1,10 @@
 var head;
 var clickable;
 const N = 5;
+var initialized = false;
 
 function setup() {
-    head = new Node(N, N, 500 + 100 * N, 300);
+    head = new Node(N, N, 500 + 100 * N, 400);
     nodes = []
     clickable = [];
     current = [];
@@ -21,8 +22,15 @@ function setup() {
 }
 
 function draw() {
+    rectMode(CORNER);
+    fill(180);
+    noStroke();
+    rect(75, 275, 130, 50);
+    fill(255);
+    textSize(16);
+    textAlign(CENTER, CENTER);
+    text('Generate', 140, 300);
     strokeWeight(5);
-
     head.display();
     // nodes[1].display();
     fill(240, 230, 140);
@@ -34,7 +42,7 @@ function draw() {
     stroke(240, 230, 140);
 
     for (var i = 0; i < clickable.length; i++) {
-        node = clickable[i]
+        node = clickable[i];
         if (node.clicked()) {
             if (node.left) {
                 node.leftArrow();
@@ -59,8 +67,13 @@ function draw() {
     }
 
     if (head.revealed) {
-        window.alert("Congratulations! You solved fibonacci through tree recursion.")
-        head.revealed = false;
+        textAlign(CENTER);
+        textFont('Helvetica');
+        textSize(20);
+        noStroke();
+        fill(50, 205, 50);
+        text('Congratulations! You solved fibonacci through tree recursion.', 500 + 100 * N, 300);
+        // head.revealed = false;
     }
 }
 
@@ -82,6 +95,8 @@ function Node(n, level, x, y) {
     this.level = level;
     this.revealed = false;
     this.ready = false;
+    this.width = 10 + 40 * level;
+    this.height = 50 + 10 * level;
 
     this.reveal = function() {
         this.revealed = true;
@@ -95,20 +110,20 @@ function Node(n, level, x, y) {
         } else {
             fill(240, 230, 140);
         }
-        rect(this.x, this.y, 10 + 40 * this.level, 50 + 10 * this.level);
+        rect(this.x, this.y, this.width, this.height);
         fill(105);
         textSize(10 + 4 * this.level);
         textAlign(CENTER, CENTER);
         if (this.revealed) {
             text(this.fib, this.x, this.y);
         } else {
-            text("fib(" + this.n + ")", this.x, this.y);
+            text('fib(' + this.n + ')', this.x, this.y);
         }
     }
 
     this.hovered = function() {
-        return mouseX > (this.x - 100) && mouseX < (this.x + 100)
-            && mouseY > (this.y - 50) && mouseY < (this.y + 50);
+        return mouseX > (this.x - this.width) && mouseX < (this.x + this.width)
+            && mouseY > (this.y - this.height) && mouseY < (this.y + this.height);
     }
 
     this.clicked = function() {
@@ -154,20 +169,30 @@ function initialize(node, arr) {
 
 function showCode() {
     textSize(32);
-    textFont("Helvetica");
+    textFont('Helvetica');
     strokeWeight(0);
     textAlign(CENTER);
-    text("Tree Recursion", 500, 50);
+    text('Tree Recursion', 500, 50);
 
     textAlign(LEFT);
-    textFont("Courier");
-    textSize(12);
-
-    var code = "function fib(n) {\n" +
-               "  if n < 2 {\n" +
-               "    return n;\n" +
-               "  }\n" +
-               "  return fib(n - 1) + fib(n - 2);\n" +
-               "}";
+    textFont('Courier');
+    textSize(16);
+    fill(105);
+    var code = 'function fib(n) {\n' +
+               '  if n < 2 {\n' +
+               '    return n;\n' +
+               '  }\n' +
+               '  return fib(n - 1) + fib(n - 2);\n' +
+               '}';
     text(code, 75, 100);
+    fill(0);
+    textFont('Helvetica');
+    textSize(16)
+    var instructions = 'Instructions: Click on the yellow nodes to open up their recursive cases, then click on green nodes to solve for base cases.';
+    text(instructions, 75, 250)
+
+    var prompt = 'Choose a number N to solve for fib(N):';
+    // text(prompt, 75, 275);
+
+    textFont('Courier');
 }
